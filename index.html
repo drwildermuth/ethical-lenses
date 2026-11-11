@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Ethical Lens Comes First for You?</title>
+<style>
+  :root {
+    --red: #C41230;
+    --red-dark: #9E0E26;
+    --ink: #252827;
+    --muted: #6b6f6e;
+    --line: #e4e2e0;
+    --soft: #f7f4f3;
+    --bar: #d9b9bf;
+    --bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Century Gothic", "Avenir Next", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--soft);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    background: var(--red);
+    color: #fff;
+    padding: 22px 20px 20px;
+  }
+  header .wrap { max-width: 760px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: clamp(1.25rem, 4.2vw, 1.7rem); line-height: 1.2; }
+  header p { margin: 6px 0 0; opacity: .92; font-size: .95rem; }
+  main { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+  .progress { margin: 0 0 14px; }
+  .progress .label { font-size: .85rem; color: var(--muted); display: flex; justify-content: space-between; }
+  .track { height: 8px; background: #ece8e7; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .fill { height: 100%; width: 0; background: var(--red); transition: width .25s ease; }
+  h2 { margin: 0 0 4px; font-size: 1.15rem; }
+  .situation { font-size: 1.2rem; font-weight: 700; margin: 0 0 6px; }
+  .hint { color: var(--muted); font-size: .92rem; margin: 0 0 16px; }
+  .options { display: grid; gap: 10px; }
+  .opt {
+    appearance: none; -webkit-appearance: none;
+    text-align: left; font: inherit; color: inherit;
+    background: #fff; border: 2px solid var(--line); border-radius: 12px;
+    padding: 13px 14px; cursor: pointer; display: flex; gap: 12px; align-items: flex-start;
+    transition: border-color .12s, background .12s, transform .05s;
+  }
+  .opt:hover { border-color: #c9a0a8; background: #fdf8f8; }
+  .opt:focus-visible { outline: 3px solid #2b6cb0; outline-offset: 2px; }
+  .opt:active { transform: scale(.995); }
+  .opt .num {
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--soft); color: var(--muted); font-size: .82rem; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .opt.sel { border-color: var(--red); background: #fdf1f3; }
+  .opt.sel .num { background: var(--red); color: #fff; }
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+  .btn {
+    font: inherit; font-weight: 700; border-radius: 10px; padding: 11px 18px; cursor: pointer;
+    border: 2px solid var(--red); background: var(--red); color: #fff;
+  }
+  .btn:hover { background: var(--red-dark); border-color: var(--red-dark); }
+  .btn.ghost { background: #fff; color: var(--red); }
+  .btn.ghost:hover { background: #fdf1f3; }
+  .btn[disabled] { opacity: .4; cursor: default; }
+  .btn:focus-visible { outline: 3px solid #2b6cb0; outline-offset: 2px; }
+  .welcome h2 { font-size: 1.3rem; margin-bottom: 8px; }
+  .welcome ul { padding-left: 1.1rem; margin: 10px 0 18px; }
+  .welcome li { margin: 4px 0; }
+  .hidden { display: none !important; }
+
+  /* results */
+  .top-lens { border-left: 6px solid var(--red); }
+  .kicker { font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--red); font-weight: 700; margin: 0 0 4px; }
+  .lens-name { font-size: 1.5rem; font-weight: 800; margin: 0 0 8px; line-height: 1.2; }
+  .lens-q { background: var(--soft); border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
+  .lens-q b { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 2px; }
+  .two { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 620px) { .two { grid-template-columns: 1fr 1fr; } }
+  .mini { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: #fff; }
+  .mini h4 { margin: 0 0 4px; font-size: .9rem; }
+  .mini p { margin: 0; font-size: .92rem; }
+  .bars { margin: 6px 0 0; }
+  .barrow { display: grid; grid-template-columns: minmax(120px, 210px) 1fr 40px; gap: 10px; align-items: center; margin: 9px 0; font-size: .93rem; }
+  @media (max-width: 520px) { .barrow { grid-template-columns: 1fr 40px; } .barrow .bt { grid-column: 1 / -1; } }
+  .bt { font-weight: 600; }
+  .bt small { display: block; color: var(--muted); font-weight: 400; font-size: .78rem; }
+  .bartrack { height: 14px; background: #ece8e7; border-radius: 99px; overflow: hidden; }
+  .barfill { height: 100%; background: var(--bar); border-radius: 99px; width: 0; transition: width .6s ease; }
+  .barfill.top { background: var(--red); }
+  .bv { text-align: right; font-weight: 700; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .toast { color: #1f7a3f; font-weight: 700; margin-left: 4px; align-self: center; }
+  .foot { color: var(--muted); font-size: .85rem; margin-top: 18px; }
+  .stack > * + * { margin-top: 14px; }
+  .sr { position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Which ethical lens comes first for you?</h1>
+    <p>A quick reflection tool for HR professionals. About 3 minutes.</p>
+  </div>
+</header>
+
+<main>
+  <!-- Welcome -->
+  <section id="welcome" class="card welcome">
+    <h2>Before you start</h2>
+    <p><b>Read each statement and rate how much it sounds like you.</b> Think about how you actually make decisions at work, not how you think you should. Go with your first reaction.</p>
+    <ul>
+      <li>1 = Not like me &nbsp;&middot;&nbsp; 3 = Somewhat like me &nbsp;&middot;&nbsp; 5 = Very much like me</li>
+      <li>There are no right or wrong answers, and no lens is better than another.</li>
+      <li>Your results appear instantly and stay on your device.</li>
+      <li>This is a reflection tool, not a scientific test.</li>
+    </ul>
+    <button class="btn" id="startBtn">Start</button>
+  </section>
+
+  <!-- Question -->
+  <section id="quiz" class="hidden">
+    <div class="progress">
+      <div class="label"><span id="pLabel">Statement 1 of 20</span><span id="pPct">0%</span></div>
+      <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="20" aria-valuenow="0" id="pTrack"><div class="fill" id="pFill"></div></div>
+    </div>
+    <div class="card">
+      <p class="situation" id="sit"></p>
+      <p class="hint">How much does this sound like you, at work? Tap one (or press 1 to 5).</p>
+      <div class="options" id="opts" role="group" aria-label="Rating"></div>
+      <div class="nav">
+        <button class="btn ghost" id="backBtn">Back</button>
+        <span class="hint" style="margin:0" id="saveHint"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section id="results" class="hidden stack" aria-live="polite">
+    <div class="card top-lens" id="topCard"></div>
+    <div class="card">
+      <h2>Your full picture</h2>
+      <p class="hint">Your average rating (out of 5) for each lens, from four statements each.</p>
+      <div class="bars" id="bars"></div>
+    </div>
+    <div class="card" id="lowCard"></div>
+    <div class="card">
+      <h2>Share your result</h2>
+      <p class="hint">Copy a one-line summary to paste in the chat.</p>
+      <div class="actions">
+        <button class="btn" id="copyBtn">Copy my result</button>
+        <button class="btn ghost" id="retakeBtn">Retake the survey</button>
+        <span class="toast hidden" id="toast">Copied!</span>
+      </div>
+      <p class="foot">Every lens has a strength and a blind spot. The goal is not to find the best lens, but to notice which one you reach for first, and which one you may skip.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var LENSES = {
+    R: {
+      name: "Results",
+      short: "Results",
+      sub: "Utilitarianism (Bentham, Mill)",
+      q: "What produces the best ratio of happiness to harm?",
+      strength: "You look at the big picture and weigh outcomes for everyone affected.",
+      blind: "What helps the majority can run over a minority who pay the cost."
+    },
+    D: {
+      name: "Duty",
+      short: "Duty",
+      sub: "Kantian ethics",
+      q: "What is the right thing to do, always, regardless of who is involved?",
+      strength: "You are principled and consistent, and you protect the dignity of every person involved.",
+      blind: "Rules can get rigid, duties can conflict, and consequences can drop out of view."
+    },
+    F: {
+      name: "Fairness",
+      short: "Fairness",
+      sub: "Rawlsian justice",
+      q: "What would I do if I did not know how this decision would affect me or the people close to me? In other words, what would be fair to everyone, whichever seat I ended up in?",
+      strength: "You look for rules and decisions that hold up whichever seat you end up in.",
+      blind: "It can feel abstract, and it can miss the relationships and context of a real case."
+    },
+    C: {
+      name: "Care",
+      short: "Care",
+      sub: "Ethics of care",
+      q: "What preserves relationships and protects others from harm?",
+      strength: "You pay attention to relationships and to the people who are most vulnerable or least heard.",
+      blind: "Care can slide into favoritism toward the people closest to us, and it can wear out the caregiver."
+    },
+    V: {
+      name: "Character",
+      short: "Character",
+      sub: "Virtue ethics",
+      q: "What would a virtuous person do?",
+      strength: "You think about integrity and balance: who you become through the choices you make.",
+      blind: "It can feel vague, and people disagree about which virtues count most."
+    }
+  };
+  var KEYS = ["R", "D", "F", "C", "V"];
+  var SCALE = ["Not like me", "A little like me", "Somewhat like me", "Mostly like me", "Very much like me"];
+
+  var STATEMENTS = [
+    ["R", "When I make a decision, I try to work out which choice will help the most people."],
+    ["R", "I will accept a hard decision if the overall outcome is better."],
+    ["R", "I count who gains and who loses before I decide."],
+    ["R", "A good decision is one that works well in practice."],
+    ["D", "Some things are wrong no matter how good the outcome would be."],
+    ["D", "A rule should apply to everyone, including people I like."],
+    ["D", "I keep my promises even when it is inconvenient."],
+    ["D", "People deserve respect, whatever they have done."],
+    ["F", "Before I decide, I ask who has the least say in the situation."],
+    ["F", "I want a decision to hold up even if I were the one on the receiving end."],
+    ["F", "I would rather have a process everyone accepts than a result only I like."],
+    ["F", "I check whether people in different positions would see the decision as fair."],
+    ["C", "When someone is struggling, I start with what they need."],
+    ["C", "Keeping trust in a relationship matters as much as being right."],
+    ["C", "I notice who in a room is being hurt or left out."],
+    ["C", "I would bend a rule to protect someone who is vulnerable."],
+    ["V", "I ask myself what kind of professional I want to be."],
+    ["V", "Integrity matters more to me than winning an argument."],
+    ["V", "I want my choices to match who I say I am."],
+    ["V", "I look for the balance between being too tough and too soft."]
+  ];
+
+  var TOTAL = STATEMENTS.length;
+  var PER = TOTAL / KEYS.length;
+  var $ = function (id) { return document.getElementById(id); };
+  var items = [];
+  var ratings = [];
+  var idx = 0;
+  var advanceTimer = null;
+
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function show(id) {
+    ["welcome", "quiz", "results"].forEach(function (s) {
+      $(s).classList.toggle("hidden", s !== id);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function start() {
+    ratings = [];
+    items = shuffle(STATEMENTS);
+    idx = 0;
+    show("quiz");
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    $("sit").textContent = items[idx][1];
+    $("pLabel").textContent = "Statement " + (idx + 1) + " of " + TOTAL;
+    var pct = Math.round((idx / TOTAL) * 100);
+    $("pPct").textContent = pct + "%";
+    $("pFill").style.width = pct + "%";
+    $("pTrack").setAttribute("aria-valuenow", String(idx));
+    $("backBtn").disabled = idx === 0;
+    var box = $("opts");
+    box.innerHTML = "";
+    SCALE.forEach(function (label, n) {
+      var v = n + 1;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt" + (ratings[idx] === v ? " sel" : "");
+      b.setAttribute("data-v", String(v));
+      var num = document.createElement("span");
+      num.className = "num";
+      num.textContent = String(v);
+      num.setAttribute("aria-hidden", "true");
+      var txt = document.createElement("span");
+      txt.textContent = label;
+      b.appendChild(num);
+      b.appendChild(txt);
+      b.addEventListener("click", function () { choose(v); });
+      box.appendChild(b);
+    });
+  }
+
+  function choose(v) {
+    ratings[idx] = v;
+    var buttons = $("opts").querySelectorAll(".opt");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].classList.toggle("sel", buttons[i].getAttribute("data-v") === String(v));
+    }
+    clearTimeout(advanceTimer);
+    advanceTimer = setTimeout(function () {
+      if (idx < TOTAL - 1) {
+        idx++;
+        renderQuestion();
+      } else {
+        finish();
+      }
+    }, 260);
+  }
+
+  function score() {
+    var c = {};
+    KEYS.forEach(function (k) { c[k] = 0; });
+    items.forEach(function (it, i) { c[it[0]] += ratings[i] || 0; });
+    return c;
+  }
+
+  function avg(sum) { return (Math.round((sum / PER) * 10) / 10).toFixed(1); }
+
+  function finish() {
+    var c = score();
+    var max = Math.max.apply(null, KEYS.map(function (k) { return c[k]; }));
+    var min = Math.min.apply(null, KEYS.map(function (k) { return c[k]; }));
+    var tops = KEYS.filter(function (k) { return c[k] === max; });
+    var lows = KEYS.filter(function (k) { return c[k] === min; });
+    var balanced = (max - min) <= 1;
+
+    var top = $("topCard");
+    var html = "";
+    if (balanced) {
+      html += '<p class="kicker">Your first-instinct lens</p>';
+      html += '<p class="lens-name">A balanced profile</p>';
+      html += '<p style="margin:0 0 6px;color:var(--muted)">Your ratings are very close across all five lenses (about ' + avg(max) + ' of 5), so no single lens stands out. You may draw on all of them about equally, or you may have rated every statement the same way.</p>';
+      html += '<p style="margin:8px 0">Try this: pick the lens you use least, and ask its question on your next hard call.</p>';
+    } else if (tops.length === 1) {
+      var L = LENSES[tops[0]];
+      html += '<p class="kicker">Your first-instinct lens</p>';
+      html += '<p class="lens-name">' + esc(L.name) + '</p>';
+      html += '<p style="margin:0 0 6px;color:var(--muted)">' + esc(L.sub) + ' &middot; average ' + avg(c[tops[0]]) + ' of 5</p>';
+      html += '<p style="margin:8px 0"><b>Strength:</b> ' + esc(L.strength) + '</p>';
+      html += '<p style="margin:8px 0"><b>Blind spot:</b> ' + esc(L.blind) + '</p>';
+      html += '<div class="lens-q"><b>Its question</b>' + esc(L.q) + '</div>';
+    } else {
+      html += '<p class="kicker">Your first-instinct lenses</p>';
+      html += '<p class="lens-name">A tie: ' + tops.map(function (k) { return esc(LENSES[k].short); }).join(" and ") + '</p>';
+      html += '<p style="margin:0 0 10px;color:var(--muted)">Average ' + avg(max) + ' of 5 each. You move between these lenses depending on the situation.</p>';
+      html += '<div class="two">';
+      tops.slice(0, 4).forEach(function (k) {
+        var L = LENSES[k];
+        html += '<div class="mini"><h4>' + esc(L.name) + '</h4><p><b>Its question:</b> ' + esc(L.q) + '</p></div>';
+      });
+      html += '</div>';
+    }
+    top.innerHTML = html;
+
+    var order = KEYS.slice().sort(function (a, b) { return c[b] - c[a]; });
+    var bars = "";
+    order.forEach(function (k) {
+      var L = LENSES[k];
+      var pct = Math.round(((c[k] / PER) / 5) * 100);
+      var isTop = !balanced && c[k] === max;
+      bars += '<div class="barrow"><div class="bt">' + esc(L.short) + '<small>' + esc(L.sub) + '</small></div>' +
+              '<div class="bartrack"><div class="barfill' + (isTop ? ' top' : '') + '" data-w="' + pct + '"></div></div>' +
+              '<div class="bv">' + avg(c[k]) + '</div></div>';
+    });
+    $("bars").innerHTML = bars;
+
+    var lowList = (balanced ? KEYS.slice().sort(function (a, b) { return c[a] - c[b]; }) : lows).slice(0, 2);
+    var low = '<h2>A lens you may skip</h2>';
+    low += '<p class="hint">' + (balanced ? 'Your scores are close together, so any lens is a fair place to start. ' : 'These got your lowest ratings: ') +
+           lowList.map(function (k) { return esc(LENSES[k].short); }).join(' and ') +
+           '. Before your next hard call, try asking:</p>';
+    low += '<div class="two">';
+    lowList.forEach(function (k) {
+      var L = LENSES[k];
+      low += '<div class="mini"><h4>' + esc(L.name) + '</h4><p>' + esc(L.q) + '</p></div>';
+    });
+    low += '</div>';
+    $("lowCard").innerHTML = low;
+
+    var summary = "My lens survey result: " +
+      (balanced ? "balanced across all five lenses (about " + avg(max) + " of 5)"
+       : tops.length === 1 ? LENSES[tops[0]].short + " comes first (" + avg(max) + " of 5)"
+       : "tie between " + tops.map(function (k) { return LENSES[k].short; }).join(" and ") + " (" + avg(max) + " of 5 each)") +
+      (balanced ? "." : ". Lowest: " + lowList.map(function (k) { return LENSES[k].short + " (" + avg(c[k]) + ")"; }).join(", ") + ".");
+    $("copyBtn").setAttribute("data-text", summary);
+
+    show("results");
+    setTimeout(function () {
+      var fills = document.querySelectorAll(".barfill");
+      for (var i = 0; i < fills.length; i++) {
+        fills[i].style.width = fills[i].getAttribute("data-w") + "%";
+      }
+    }, 50);
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch];
+    });
+  }
+
+  function copy() {
+    var text = $("copyBtn").getAttribute("data-text") || "";
+    var done = function () {
+      var t = $("toast");
+      t.classList.remove("hidden");
+      setTimeout(function () { t.classList.add("hidden"); }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { window.prompt("Copy this result:", text); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  $("startBtn").addEventListener("click", start);
+  $("backBtn").addEventListener("click", function () {
+    clearTimeout(advanceTimer);
+    if (idx > 0) { idx--; renderQuestion(); }
+  });
+  $("retakeBtn").addEventListener("click", function () { show("welcome"); });
+  $("copyBtn").addEventListener("click", copy);
+
+  document.addEventListener("keydown", function (e) {
+    if ($("quiz").classList.contains("hidden")) return;
+    var n = parseInt(e.key, 10);
+    if (n >= 1 && n <= 5) {
+      choose(n);
+    }
+  });
+})();
+</script>
+</body>
+</html>
