@@ -121,12 +121,17 @@
   .tag { font-size:.78rem; font-weight:700; border-radius:99px; padding:2px 9px; white-space:nowrap; align-self:center; background:#ece8e7; color:var(--muted); }
   .tag.u { background:#e6f3ea; color:#1f7a3f; } .tag.s { background:#fdf1f3; color:var(--red-dark); }
   .prompts li { margin: 6px 0; }
+  textarea.own { width:100%; font:inherit; border:2px solid var(--line); border-radius:10px; padding:10px 12px; margin-top:8px; min-height:70px; resize:vertical; }
+  textarea.own:focus { outline:3px solid #2b6cb0; outline-offset:2px; }
+  .near b { display:block; margin:10px 0 6px; }
+  .actline { color: var(--muted); font-size:.92rem; margin:0 0 12px; }
+  .actline b { color: var(--ink); }
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <h1>Team challenge: five lenses, one decision</h1>
+    <h1>Team challenge: what to do, and why</h1>
     <p>For a small team working together. One person drives the screen.</p>
   </div>
 </header>
@@ -134,13 +139,18 @@
   <section id="welcome" class="card welcome">
     <h2>How this works</h2>
     <p><b>Choose one person to click for the whole team</b> and share their screen. Everyone else follows along.</p>
-    <p>For each dilemma:</p>
+    <p>Each of the three dilemmas has two steps:</p>
     <ol>
-      <li><b>Decide alone (30 seconds).</b> Read the five options and pick yours silently.</li>
-      <li><b>Discuss.</b> Take turns saying which option you chose and why.</li>
-      <li><b>Agree.</b> Choose the option that matches most of your team's answers, or one everyone can live with.</li>
+      <li><b>What do we do?</b> Pick the action your team would take.</li>
+      <li><b>Why?</b> Pick the reason closest to the reasoning behind your choice. Two teams can pick the same action for different reasons.</li>
     </ol>
-    <p class="hint">Most teams finish four dilemmas in 15 minutes. If you are quick, keep going: there are six. Nothing is saved and nothing is sent anywhere.</p>
+    <p>For each step:</p>
+    <ul>
+      <li><b>Decide alone first (30 seconds).</b> Choose silently.</li>
+      <li><b>Discuss.</b> Take turns saying what you chose and why.</li>
+      <li><b>Agree.</b> Choose the option that matches most of your team, or one everyone can live with.</li>
+    </ul>
+    <p class="hint">If nothing fits, there is a last option to write your own. Please look for the closest match first. Nothing is saved and nothing is sent anywhere.</p>
     <button class="btn" id="startBtn">Start</button>
   </section>
 
@@ -152,19 +162,21 @@
     <div class="card">
       <h2 id="dtitle"></h2>
       <div class="scen" id="scen"></div>
-      <div class="steps"><span class="step">1 Decide alone</span><span class="step">2 Discuss why</span><span class="step">3 Agree as a team</span></div>
+      <p class="actline hidden" id="actline"></p>
       <p class="situation" id="ask"></p>
+      <p class="hint" id="hint"></p>
       <div class="options" id="opts" role="group" aria-label="Team answer"></div>
-      <div class="unity">
+      <div id="ownbox" class="hidden">
+        <textarea class="own" id="ownText" aria-label="Your own answer" placeholder=""></textarea>
+        <div class="near hidden" id="nearBox"><b>Which lens is your reason closest to?</b><div class="seg" id="nearSeg"></div></div>
+      </div>
+      <div class="unity hidden" id="unityBox">
         <b>How did the team get there?</b>
         <div class="seg" id="seg"></div>
       </div>
       <div class="nav">
         <button class="btn ghost" id="backBtn">Back</button>
-        <span>
-          <button class="btn ghost" id="finishBtn">Finish now</button>
-          <button class="btn" id="nextBtn" disabled>Next</button>
-        </span>
+        <button class="btn" id="nextBtn" disabled>Next</button>
       </div>
     </div>
   </section>
@@ -172,8 +184,8 @@
   <section id="results" class="hidden stack" aria-live="polite">
     <div class="card top-lens" id="topCard"></div>
     <div class="card">
-      <h2>Your team's lens profile</h2>
-      <p class="hint">How many of your team decisions came from each lens.</p>
+      <h2>Your team's reasons</h2>
+      <p class="hint">How many of your team's reasons came from each lens.</p>
       <div class="bars" id="bars"></div>
     </div>
     <div class="card">
@@ -192,7 +204,7 @@
         <button class="btn ghost" id="retakeBtn">Start over</button>
         <span class="toast hidden" id="toast">Copied!</span>
       </div>
-      <p class="foot">There is no best lens. The point is to notice which lenses your team reached for, and which it left out.</p>
+      <p class="foot">There is no best lens. The point is to notice which reasons your team reached for, and which it left out.</p>
     </div>
   </section>
 </main>
@@ -210,168 +222,184 @@
 
   var DILEMMAS = [
     { title: "The AI that can do the job",
-      scen: "A software vendor shows leadership an AI tool that could handle the work of your 12-person customer support team at one third of the cost. The company had a good year. Leadership wants a rollout plan in 30 days. The team knows nothing yet.",
-      ask: "As HR leader, what do you recommend?",
-      a: {
-        R: "Back the plan that protects the most jobs and customers over the next few years, even though some roles will go.",
-        D: "Tell the team now, before anything is decided. People have a right to know about something that affects their livelihood.",
-        F: "Set terms you would accept if you were the person whose job is replaced: long notice, paid retraining, and the same rules for everyone.",
-        C: "Start with the people. Meet each person one on one, begin with those who will struggle most, and help them plan what comes next.",
-        V: "Do what an honest, courageous HR leader would do: tell leadership the timeline must be humane, and do not call job cuts \u201coptimization.\u201d" } },
-    { title: "A CEO under suspicion",
-      scen: "A board member tells you in confidence that the CEO is in a relationship with a consultant who may be passing sensitive information to a foreign government. There is no proof. The CEO says it is personal. The company is in the middle of a sensitive contract. The board member asks you to keep quiet until they have \u201cconfirmed.\u201d",
+      scen: "Leadership has decided to replace your 12-person customer support team with an AI tool that costs a third as much. The rollout starts in 90 days. The team knows nothing yet, and you have been asked to plan how it happens.",
       ask: "What do you do?",
-      a: {
-        R: "Bring in the company's lawyers and security now. The risk to the contract, and to everyone who depends on it, outweighs the CEO's privacy.",
-        D: "Follow the conflict-of-interest policy: a possible conflict is reported through the proper channel, whoever it involves, the CEO included.",
-        F: "Use the same investigation process you would use for any employee, and make sure it is one you would accept if you were the CEO accused or the employee who raised it.",
-        C: "Talk privately with the CEO and with the board member. Both are people with a lot to lose, and a rumor can wreck a career and a family.",
-        V: "Be courageous and prudent. Do not look away because the person is the boss, and do not spread a rumor. Get the facts and take them to the right people." } },
+      acts: [
+        "Tell the team now, before the plan is finished.",
+        "Finish the transition plan first, then tell the team with the plan in hand.",
+        "Ask leadership to phase the rollout, using attrition and redeployment before any layoffs.",
+        "Announce the tool now as a pilot, and share the effect on jobs once it is final." ],
+      why: {
+        R: "Because the plan should cause the least total harm to the people affected, to the company and to its customers.",
+        D: "Because people have a right to the truth about something that decides their livelihood, whatever the consequences.",
+        F: "Because the terms should be ones I would accept if I were one of the 12: fair notice, support, and the same rules for everyone.",
+        C: "Because the people who will be hurt most need attention first, and how they hear this matters as much as what they hear.",
+        V: "Because I want to act as an honest and courageous HR leader would: clear about what is happening, and humane about how." } },
+    { title: "A CEO under suspicion",
+      scen: "A board member tells you in confidence that the CEO is in a relationship with a consultant who may be passing sensitive information to a foreign government. There is no proof, and the CEO says it is personal. The company is in the middle of a sensitive contract. The board member asks you to say nothing until they have “confirmed.” You are the only other person who knows.",
+      ask: "What do you do?",
+      acts: [
+        "Report it to the general counsel or the audit committee now.",
+        "Quietly limit the consultant's access and gather facts first.",
+        "Talk privately with the CEO first.",
+        "Wait until the board member confirms before doing anything." ],
+      why: {
+        R: "Because the possible harm, to the contract and to everyone who depends on it, is large enough to justify acting even without proof.",
+        D: "Because a possible conflict of interest must be reported whoever it involves, and a promise of silence cannot override that.",
+        F: "Because everyone deserves the same fair process, one I would accept if I were the CEO accused or the employee who raised it: facts first, and no assumption of guilt.",
+        C: "Because the CEO and the board member are both people with a lot to lose, and a rumor can wreck a career and a family.",
+        V: "Because a person of integrity neither shields the boss nor spreads a rumor, and acts with both courage and prudence." } },
     { title: "The screening tool",
       scen: "Your AI resume screener has cut time-to-hire in half. An analyst finds it rejects candidates with employment gaps at twice the usual rate, and those candidates are mostly women returning from caregiving. The hiring manager says the tool finds the best people and that fixing it will delay 40 open roles.",
       ask: "What do you do?",
-      a: {
-        R: "Weigh the total benefits and harms: faster hiring for many against unfair rejections for some. Keep the tool only if the numbers clearly favor it.",
-        D: "Pause the tool. Screening people out for caregiving gaps is wrong, however much time it saves.",
-        F: "Change the process so you would trust it if you were an applicant with a gap on your resume: a person reviews every rejection of that kind.",
-        C: "Reach out to the rejected candidates and give them a second look, and talk with the hiring managers about who is being left out.",
-        V: "Ask what you would be proud to put your name on. Fix it first, even if it is slower, and explain why to the hiring manager." } },
-    { title: "Confidential data in a chatbot",
-      scen: "One of your best performers pasted a client's confidential data into a public AI chatbot to finish a report faster. She has just returned from family leave. You are the only one who has noticed.",
-      ask: "What do you do?",
-      a: {
-        R: "Assess how likely and how serious the exposure is, and let the size of the possible harm decide how far to escalate.",
-        D: "Report it, as the policy and the law require, and treat her like any other employee who broke the rule.",
-        F: "Choose a response you could defend to her and to the client: report the breach, and keep the consequence proportionate.",
-        C: "Talk with her first. She may be overwhelmed after leave, and what she needs is support and training, not punishment.",
-        V: "Be firm and kind: report it, coach her, and own your part if the rules about AI were never made clear." } },
-    { title: "The viral post",
-      scen: "An employee's post about a political event goes viral. It was on her personal account, outside work hours. Customers are angry, and two large clients threaten to leave. Her manager wants her gone by Friday.",
-      ask: "What do you recommend?",
-      a: {
-        R: "Weigh the consequences of each choice for the company, the jobs that depend on those clients, and for her.",
-        D: "Apply the social media policy exactly as written, the same as you would for anyone, whatever the opinion.",
-        F: "Choose a rule you could accept whichever side you were on: the employee, the offended customer, or a coworker who disagrees with her.",
-        C: "Talk with her first, and with the coworkers who feel hurt. Look for a way to repair the damage without ending a career.",
-        V: "Ask what a professional with integrity and courage would do: do not bow to pressure, and do not ignore real harm." } },
-    { title: "Predicting who will quit",
-      scen: "A vendor offers an AI tool that reads email and chat patterns to flag employees likely to resign. Your CEO says it would help you keep talent. Employees have not been told it exists.",
-      ask: "What do you recommend?",
-      a: {
-        R: "Pilot it only if keeping talent clearly outweighs the harm of people feeling watched, and measure both.",
-        D: "Do not use it secretly. People are not data to be mined, and they have a right to know how they are being watched.",
-        F: "Adopt it only on terms you would accept as an employee being analyzed: full disclosure, limits on use, and the same rules for executives.",
-        C: "Skip the tool and talk to people. Ask them what would make them stay, and fix the problems you hear about.",
-        V: "Ask what kind of workplace you want to be known for. Choose the option that builds trust, even if it costs some retention." } }
+      acts: [
+        "Pause the tool until the bias is fixed.",
+        "Keep the tool, with a person reviewing every rejection of a candidate with a gap.",
+        "Keep the tool and monitor the numbers, fixing it over time.",
+        "Contact the rejected candidates and give them a second look, whatever you decide about the tool." ],
+      why: {
+        R: "Because I should weigh the total benefits and harms: faster hiring for many against unfair rejection for some.",
+        D: "Because screening people out for caregiving gaps is wrong, however much time it saves.",
+        F: "Because the process should be one I would trust if I were an applicant with a gap on my resume.",
+        C: "Because the people being left out need attention first, and I should see who they are.",
+        V: "Because I want to put my name only on a process I am proud of, even if it is slower." } }
   ];
 
   var $ = function (id) { return document.getElementById(id); };
-  var state = { i: 0, picks: [], unity: [], order: [] };
   var UNITY = ["Everyone agreed", "Most of us agreed", "We were split"];
+  var state;
 
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  function show(id) { ["welcome", "quiz", "results"].forEach(function (s) { $(s).classList.toggle("hidden", s !== id); }); window.scrollTo(0, 0); }
+  function show(id) { ["welcome", "quiz", "results"].forEach(function (s) { $(s).classList.toggle("hidden", s !== id); }); try { window.scrollTo(0, 0); } catch (e) {} }
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
 
   function start() {
-    state.i = 0; state.picks = []; state.unity = [];
-    state.order = DILEMMAS.map(function () { return shuffle(KEYS); });
+    state = { i: 0, step: 1, rec: DILEMMAS.map(function () { return { act: null, actText: "", why: null, whyText: "", near: null, unity: null }; }),
+      actOrder: DILEMMAS.map(function (d) { return shuffle(d.acts.map(function (_, k) { return k; })); }),
+      whyOrder: DILEMMAS.map(function () { return shuffle(KEYS); }) };
     show("quiz"); render();
   }
 
+  function ready() {
+    var r = state.rec[state.i];
+    if (state.step === 1) return r.act != null && (r.act !== "x" || r.actText.trim().length > 2);
+    var okWhy = r.why != null && (r.why !== "x" || (r.whyText.trim().length > 2 && r.near != null));
+    return okWhy && r.unity != null;
+  }
+
   function render() {
-    var d = DILEMMAS[state.i], n = DILEMMAS.length;
-    $("pLabel").textContent = "Dilemma " + (state.i + 1) + " of " + n;
-    $("pPct").textContent = Math.round(state.i / n * 100) + "%";
-    $("pFill").style.width = Math.round(state.i / n * 100) + "%";
-    $("dtitle").textContent = d.title; $("scen").textContent = d.scen; $("ask").textContent = d.ask;
+    var d = DILEMMAS[state.i], r = state.rec[state.i], n = DILEMMAS.length, step = state.step;
+    var pct = Math.round(((state.i * 2) + (step - 1)) / (n * 2) * 100);
+    $("pLabel").textContent = "Dilemma " + (state.i + 1) + " of " + n + " · Step " + step + " of 2";
+    $("pPct").textContent = pct + "%"; $("pFill").style.width = pct + "%";
+    $("dtitle").textContent = d.title; $("scen").textContent = d.scen;
     var box = $("opts"); box.innerHTML = "";
-    state.order[state.i].forEach(function (k, idx) {
-      var b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.setAttribute("data-k", k);
-      var num = document.createElement("span"); num.className = "num"; num.textContent = String.fromCharCode(65 + idx);
-      var tx = document.createElement("span"); tx.textContent = d.a[k];
-      b.appendChild(num); b.appendChild(tx);
-      if (state.picks[state.i] === k) b.classList.add("sel");
-      b.addEventListener("click", function () { state.picks[state.i] = k; render(); });
-      box.appendChild(b);
-    });
-    var seg = $("seg"); seg.innerHTML = "";
-    UNITY.forEach(function (u, ui) {
-      var b = document.createElement("button"); b.type = "button"; b.textContent = u;
-      if (state.unity[state.i] === ui) b.classList.add("sel");
-      b.addEventListener("click", function () { state.unity[state.i] = ui; render(); });
-      seg.appendChild(b);
-    });
-    var ready = state.picks[state.i] != null && state.unity[state.i] != null;
-    $("nextBtn").disabled = !ready;
-    $("nextBtn").textContent = state.i === n - 1 ? "See results" : "Next";
-    $("backBtn").disabled = state.i === 0;
-    $("finishBtn").classList.toggle("hidden", state.i < 3 || state.i === n - 1 || !ready);
+    var own = $("ownText");
+    if (step === 1) {
+      $("actline").classList.add("hidden");
+      $("ask").textContent = "Step 1. What does your team do?";
+      $("hint").textContent = "Decide alone, discuss, then agree on one action.";
+      state.actOrder[state.i].forEach(function (k, idx) { box.appendChild(option(String.fromCharCode(65 + idx), d.acts[k], r.act === k, function () { r.act = k; render(); })); });
+      box.appendChild(option("+", "None of these. We would do something else.", r.act === "x", function () { r.act = "x"; render(); }));
+      $("ownbox").classList.toggle("hidden", r.act !== "x");
+      $("nearBox").classList.add("hidden"); $("unityBox").classList.add("hidden");
+      own.placeholder = "What would your team do instead?"; own.value = r.actText;
+    } else {
+      var al = $("actline"); al.classList.remove("hidden"); al.innerHTML = "<b>Your action:</b> ";
+      al.appendChild(document.createTextNode(r.act === "x" ? r.actText : d.acts[r.act]));
+      $("ask").textContent = "Step 2. Why? Pick the reason closest to your reasoning.";
+      $("hint").textContent = "Do two of these reasons lead to the same action? What would have to change in the facts for them to split? If nothing fits, use the last option, but look for the closest match first.";
+      state.whyOrder[state.i].forEach(function (k, idx) { box.appendChild(option(String.fromCharCode(65 + idx), d.why[k], r.why === k, function () { r.why = k; render(); })); });
+      box.appendChild(option("+", "None of these fit. Our reason is different.", r.why === "x", function () { r.why = "x"; render(); }));
+      $("ownbox").classList.toggle("hidden", r.why !== "x");
+      $("nearBox").classList.toggle("hidden", r.why !== "x");
+      own.placeholder = "What is your team's reason?"; own.value = r.whyText;
+      var ns = $("nearSeg"); ns.innerHTML = "";
+      KEYS.concat(["none"]).forEach(function (k) {
+        var b = el("button", r.near === k ? "sel" : "", k === "none" ? "None of them" : LENSES[k].name); b.type = "button";
+        b.addEventListener("click", function () { r.near = k; render(); }); ns.appendChild(b);
+      });
+      $("unityBox").classList.remove("hidden");
+      var seg = $("seg"); seg.innerHTML = "";
+      UNITY.forEach(function (u, ui) { var b = el("button", r.unity === ui ? "sel" : "", u); b.type = "button"; b.addEventListener("click", function () { r.unity = ui; render(); }); seg.appendChild(b); });
+    }
+    $("nextBtn").disabled = !ready();
+    $("nextBtn").textContent = step === 1 ? "Next: why?" : (state.i === n - 1 ? "See results" : "Next dilemma");
+    $("backBtn").disabled = state.i === 0 && step === 1;
+  }
+
+  function option(label, text, sel, fn) {
+    var b = el("button", "opt" + (sel ? " sel" : "")); b.type = "button";
+    b.appendChild(el("span", "num", label)); b.appendChild(el("span", "", text));
+    b.addEventListener("click", fn); return b;
   }
 
   function counts() {
-    var c = { R: 0, D: 0, F: 0, C: 0, V: 0 };
-    state.picks.forEach(function (k) { if (k) c[k]++; });
+    var c = { R: 0, D: 0, F: 0, C: 0, V: 0, X: 0 };
+    state.rec.forEach(function (r) { if (r.why === "x") c.X++; else if (r.why) c[r.why]++; });
     return c;
   }
-  function done() { return state.picks.filter(function (k) { return k; }).length; }
 
   function results() {
-    var c = counts(), total = done();
+    var c = counts(), total = DILEMMAS.length;
     var max = Math.max.apply(null, KEYS.map(function (k) { return c[k]; }));
-    var tops = KEYS.filter(function (k) { return c[k] === max; });
+    var tops = max > 0 ? KEYS.filter(function (k) { return c[k] === max; }) : [];
     var zero = KEYS.filter(function (k) { return c[k] === 0; });
-    var top = $("topCard");
-    var title = tops.length === 1 ? LENSES[tops[0]].name : tops.map(function (k) { return LENSES[k].name; }).join(" + ");
-    top.innerHTML = "<p class='kicker'>Your team leaned on</p><p class='lens-name'></p><p></p>";
-    top.querySelector(".lens-name").textContent = title;
-    top.lastChild.textContent = tops.length === 1
+    var top = $("topCard"); top.innerHTML = "";
+    top.appendChild(el("p", "kicker", "Your team's reasons leaned on"));
+    top.appendChild(el("p", "lens-name", tops.length ? tops.map(function (k) { return LENSES[k].name; }).join(" + ") : "Your own reasons"));
+    top.appendChild(el("p", "", tops.length === 1
       ? "Your team chose this lens in " + max + " of " + total + " dilemmas. " + LENSES[tops[0]].q
-      : "Your team split its choices between these lenses, " + max + " each out of " + total + " dilemmas.";
+      : tops.length > 1 ? "Your reasons were spread evenly between these lenses, " + max + " each out of " + total + " dilemmas."
+      : "Your team wrote its own reason each time. Look at which lens each one came closest to, below."));
     var bars = $("bars"); bars.innerHTML = "";
-    KEYS.forEach(function (k) {
-      var row = document.createElement("div"); row.className = "barrow";
-      var bt = document.createElement("div"); bt.className = "bt"; bt.innerHTML = "<span></span><small></small>";
-      bt.children[0].textContent = LENSES[k].name; bt.children[1].textContent = LENSES[k].sub;
-      var tr = document.createElement("div"); tr.className = "bartrack";
-      var f = document.createElement("div"); f.className = "barfill" + (c[k] === max && max > 0 ? " top" : "");
-      tr.appendChild(f);
-      var v = document.createElement("div"); v.className = "bv"; v.textContent = c[k];
-      row.appendChild(bt); row.appendChild(tr); row.appendChild(v); bars.appendChild(row);
-      setTimeout(function () { f.style.width = (total ? c[k] / total * 100 : 0) + "%"; }, 30);
+    KEYS.concat(["X"]).forEach(function (k) {
+      var row = el("div", "barrow"), bt = el("div", "bt");
+      bt.appendChild(el("span", "", k === "X" ? "Our own reason" : LENSES[k].name));
+      bt.appendChild(el("small", "", k === "X" ? "Written by your team" : LENSES[k].sub));
+      var tr = el("div", "bartrack"), f = el("div", "barfill" + (k !== "X" && c[k] === max && max > 0 ? " top" : "")); tr.appendChild(f);
+      row.appendChild(bt); row.appendChild(tr); row.appendChild(el("div", "bv", String(c[k]))); bars.appendChild(row);
+      setTimeout(function () { f.style.width = (c[k] / total * 100) + "%"; }, 30);
     });
     var log = $("log"); log.innerHTML = "";
-    state.picks.forEach(function (k, i) {
-      if (!k) return;
-      var r = document.createElement("div"); r.className = "rowline";
-      var l = document.createElement("span"); l.textContent = DILEMMAS[i].title + ": " + LENSES[k].name;
-      var t = document.createElement("span"); t.className = "tag " + (state.unity[i] === 0 ? "u" : state.unity[i] === 2 ? "s" : ""); t.textContent = UNITY[state.unity[i]];
-      r.appendChild(l); r.appendChild(t); log.appendChild(r);
+    state.rec.forEach(function (r, i) {
+      var d = DILEMMAS[i], row = el("div", "rowline"), l = el("span");
+      var act = r.act === "x" ? r.actText : d.acts[r.act];
+      var why = r.why === "x" ? ("our own reason (closest: " + (r.near === "none" ? "none" : LENSES[r.near].name) + ")") : LENSES[r.why].name;
+      var b = el("b", "", d.title); l.appendChild(b); l.appendChild(el("br")); l.appendChild(document.createTextNode("Action: " + act)); l.appendChild(el("br")); l.appendChild(document.createTextNode("Reason: " + why));
+      row.appendChild(l); row.appendChild(el("span", "tag " + (r.unity === 0 ? "u" : r.unity === 2 ? "s" : ""), UNITY[r.unity])); log.appendChild(row);
     });
     var pr = $("prompts"); pr.innerHTML = "";
     var items = [];
-    var splitIdx = []; state.unity.forEach(function (u, i) { if (u === 2 && state.picks[i]) splitIdx.push(i); });
-    if (splitIdx.length) items.push("Where was your team split? Take \u201c" + DILEMMAS[splitIdx[0]].title + "\u201d: what did the lens that lost see that the winning lens missed?");
-    else items.push("Your team rarely split. When you agreed, did anyone feel they were giving something up? What did they give up?");
-    if (zero.length) items.push("Your team never chose " + (function (n) { return n.length > 1 ? n.slice(0, -1).join(", ") + " or " + n[n.length - 1] : n[0]; })(zero.map(function (k) { return LENSES[k].name; })) + ". What would that lens have asked about the dilemma you found hardest?");
-    items.push("Compare this with your solo survey. Did you decide as a team the way you decide alone?");
-    items.push("Which of today's decisions would you most want to revisit with a fifth, sixth or seventh person in the room?");
-    items.forEach(function (t) { var li = document.createElement("li"); li.textContent = t; pr.appendChild(li); });
+    var sp = null; state.rec.forEach(function (r, i) { if (sp == null && r.unity === 2) sp = i; });
+    if (sp != null) items.push("Where was your team split? Take “" + DILEMMAS[sp].title + "”: what did the losing view see that the winning one missed?");
+    else items.push("Your team rarely split. When you agreed, did anyone feel they were giving something up?");
+    if (zero.length) items.push("Your team never gave " + (function (n) { return n.length > 1 ? n.slice(0, -1).join(", ") + " or " + n[n.length - 1] : n[0]; })(zero.map(function (k) { return LENSES[k].name; })) + " as a reason. What would that lens have asked about the hardest dilemma?");
+    items.push("Did your team choose the same action as another team but for a different reason? When would those reasons lead to different actions?");
+    items.push("Compare this with your solo survey. Did your team reason the way each of you does alone?");
+    items.forEach(function (t) { pr.appendChild(el("li", "", t)); });
     show("results");
   }
 
   function summary() {
-    var c = counts(), total = done();
-    return "Our team's lens profile (" + total + " dilemmas): " + KEYS.map(function (k) { return LENSES[k].name + " " + c[k]; }).join(", ") + ".";
+    var c = counts();
+    return "Our team's reasons across " + DILEMMAS.length + " dilemmas: " + KEYS.map(function (k) { return LENSES[k].name + " " + c[k]; }).join(", ") + ", our own reason " + c.X + ".";
   }
 
   $("startBtn").addEventListener("click", start);
-  $("backBtn").addEventListener("click", function () { if (state.i > 0) { state.i--; render(); } });
-  $("nextBtn").addEventListener("click", function () { if (state.i < DILEMMAS.length - 1) { state.i++; render(); } else results(); });
-  $("finishBtn").addEventListener("click", results);
+  $("ownText").addEventListener("input", function (e) { var r = state.rec[state.i]; if (state.step === 1) r.actText = e.target.value; else r.whyText = e.target.value; $("nextBtn").disabled = !ready(); });
+  $("backBtn").addEventListener("click", function () { if (state.step === 2) state.step = 1; else if (state.i > 0) { state.i--; state.step = 2; } render(); });
+  $("nextBtn").addEventListener("click", function () {
+    if (state.step === 1) state.step = 2;
+    else if (state.i < DILEMMAS.length - 1) { state.i++; state.step = 1; }
+    else { results(); return; }
+    try { window.scrollTo(0, 0); } catch (e) {}
+    render();
+  });
   $("retakeBtn").addEventListener("click", function () { show("welcome"); });
   $("copyBtn").addEventListener("click", function () {
-    var t = summary(), done_ = function () { $("toast").classList.remove("hidden"); setTimeout(function () { $("toast").classList.add("hidden"); }, 1800); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done_, function () { window.prompt("Copy:", t); });
+    var t = summary(), ok = function () { $("toast").classList.remove("hidden"); setTimeout(function () { $("toast").classList.add("hidden"); }, 1800); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, function () { window.prompt("Copy:", t); });
     else window.prompt("Copy:", t);
   });
 })();
