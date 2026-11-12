@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Ethical Lens Comes First for You?</title>
+<style>
+  :root {
+    --red: #C41230;
+    --red-dark: #9E0E26;
+    --ink: #252827;
+    --muted: #6b6f6e;
+    --line: #e4e2e0;
+    --soft: #f7f4f3;
+    --bar: #d9b9bf;
+    --bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Century Gothic", "Avenir Next", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--soft);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    background: var(--red);
+    color: #fff;
+    padding: 22px 20px 20px;
+  }
+  header .wrap { max-width: 760px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: clamp(1.25rem, 4.2vw, 1.7rem); line-height: 1.2; }
+  header p { margin: 6px 0 0; opacity: .92; font-size: .95rem; }
+  main { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+  .progress { margin: 0 0 14px; }
+  .progress .label { font-size: .85rem; color: var(--muted); display: flex; justify-content: space-between; }
+  .track { height: 8px; background: #ece8e7; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .fill { height: 100%; width: 0; background: var(--red); transition: width .25s ease; }
+  h2 { margin: 0 0 4px; font-size: 1.15rem; }
+  .situation { font-size: 1.2rem; font-weight: 700; margin: 0 0 6px; }
+  .hint { color: var(--muted); font-size: .92rem; margin: 0 0 16px; }
+  .options { display: grid; gap: 10px; }
+  .opt {
+    appearance: none; -webkit-appearance: none;
+    text-align: left; font: inherit; color: inherit;
+    background: #fff; border: 2px solid var(--line); border-radius: 12px;
+    padding: 13px 14px; cursor: pointer; display: flex; gap: 12px; align-items: flex-start;
+    transition: border-color .12s, background .12s, transform .05s;
+  }
+  .opt:hover { border-color: #c9a0a8; background: #fdf8f8; }
+  .opt:focus-visible { outline: 3px solid #2b6cb0; outline-offset: 2px; }
+  .opt:active { transform: scale(.995); }
+  .opt .num {
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--soft); color: var(--muted); font-size: .82rem; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .opt.sel { border-color: var(--red); background: #fdf1f3; }
+  .opt.sel .num { background: var(--red); color: #fff; }
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+  .btn {
+    font: inherit; font-weight: 700; border-radius: 10px; padding: 11px 18px; cursor: pointer;
+    border: 2px solid var(--red); background: var(--red); color: #fff;
+  }
+  .btn:hover { background: var(--red-dark); border-color: var(--red-dark); }
+  .btn.ghost { background: #fff; color: var(--red); }
+  .btn.ghost:hover { background: #fdf1f3; }
+  .btn[disabled] { opacity: .4; cursor: default; }
+  .btn:focus-visible { outline: 3px solid #2b6cb0; outline-offset: 2px; }
+  .welcome h2 { font-size: 1.3rem; margin-bottom: 8px; }
+  .welcome ul { padding-left: 1.1rem; margin: 10px 0 18px; }
+  .welcome li { margin: 4px 0; }
+  .hidden { display: none !important; }
+
+  /* results */
+  .top-lens { border-left: 6px solid var(--red); }
+  .kicker { font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--red); font-weight: 700; margin: 0 0 4px; }
+  .lens-name { font-size: 1.5rem; font-weight: 800; margin: 0 0 8px; line-height: 1.2; }
+  .lens-q { background: var(--soft); border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
+  .lens-q b { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 2px; }
+  .two { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 620px) { .two { grid-template-columns: 1fr 1fr; } }
+  .mini { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: #fff; }
+  .mini h4 { margin: 0 0 4px; font-size: .9rem; }
+  .mini p { margin: 0; font-size: .92rem; }
+  .bars { margin: 6px 0 0; }
+  .barrow { display: grid; grid-template-columns: minmax(120px, 210px) 1fr 40px; gap: 10px; align-items: center; margin: 9px 0; font-size: .93rem; }
+  @media (max-width: 520px) { .barrow { grid-template-columns: 1fr 40px; } .barrow .bt { grid-column: 1 / -1; } }
+  .bt { font-weight: 600; }
+  .bt small { display: block; color: var(--muted); font-weight: 400; font-size: .78rem; }
+  .bartrack { height: 14px; background: #ece8e7; border-radius: 99px; overflow: hidden; }
+  .barfill { height: 100%; background: var(--bar); border-radius: 99px; width: 0; transition: width .6s ease; }
+  .barfill.top { background: var(--red); }
+  .bv { text-align: right; font-weight: 700; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .toast { color: #1f7a3f; font-weight: 700; margin-left: 4px; align-self: center; }
+  .foot { color: var(--muted); font-size: .85rem; margin-top: 18px; }
+  .stack > * + * { margin-top: 14px; }
+  .sr { position: absolute; left: -9999px; }
+
+  .scen { background: var(--soft); border-radius: 10px; padding: 12px 14px; margin: 0 0 14px; font-size: 1.02rem; }
+  .steps { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; }
+  .step { font-size: .8rem; font-weight: 700; color: var(--red); background: #fdf1f3; border-radius: 99px; padding: 4px 10px; }
+  .opt .lensname { display:none; }
+  .unity { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .unity b { display:block; margin-bottom: 8px; }
+  .seg { display: flex; gap: 8px; flex-wrap: wrap; }
+  .seg button { font: inherit; font-weight: 600; background:#fff; border: 2px solid var(--line); border-radius: 10px; padding: 9px 14px; cursor:pointer; }
+  .seg button.sel { border-color: var(--red); background:#fdf1f3; color: var(--red-dark); }
+  .seg button:focus-visible { outline: 3px solid #2b6cb0; outline-offset: 2px; }
+  .rowline { display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); font-size:.95rem; }
+  .rowline:last-child { border-bottom:0; }
+  .tag { font-size:.78rem; font-weight:700; border-radius:99px; padding:2px 9px; white-space:nowrap; align-self:center; background:#ece8e7; color:var(--muted); }
+  .tag.u { background:#e6f3ea; color:#1f7a3f; } .tag.s { background:#fdf1f3; color:var(--red-dark); }
+  .prompts li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Team challenge: five lenses, one decision</h1>
+    <p>For a small team working together. One person drives the screen.</p>
+  </div>
+</header>
+<main>
+  <section id="welcome" class="card welcome">
+    <h2>How this works</h2>
+    <p><b>Choose one person to click for the whole team</b> and share their screen. Everyone else follows along.</p>
+    <p>For each dilemma:</p>
+    <ol>
+      <li><b>Decide alone (30 seconds).</b> Read the five options and pick yours silently.</li>
+      <li><b>Discuss.</b> Take turns saying which option you chose and why.</li>
+      <li><b>Agree.</b> Choose the option that matches most of your team's answers, or one everyone can live with.</li>
+    </ol>
+    <p class="hint">Most teams finish four dilemmas in 15 minutes. If you are quick, keep going: there are six. Nothing is saved and nothing is sent anywhere.</p>
+    <button class="btn" id="startBtn">Start</button>
+  </section>
+
+  <section id="quiz" class="hidden">
+    <div class="progress">
+      <div class="label"><span id="pLabel"></span><span id="pPct"></span></div>
+      <div class="track"><div class="fill" id="pFill"></div></div>
+    </div>
+    <div class="card">
+      <h2 id="dtitle"></h2>
+      <div class="scen" id="scen"></div>
+      <div class="steps"><span class="step">1 Decide alone</span><span class="step">2 Discuss why</span><span class="step">3 Agree as a team</span></div>
+      <p class="situation" id="ask"></p>
+      <div class="options" id="opts" role="group" aria-label="Team answer"></div>
+      <div class="unity">
+        <b>How did the team get there?</b>
+        <div class="seg" id="seg"></div>
+      </div>
+      <div class="nav">
+        <button class="btn ghost" id="backBtn">Back</button>
+        <span>
+          <button class="btn ghost" id="finishBtn">Finish now</button>
+          <button class="btn" id="nextBtn" disabled>Next</button>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section id="results" class="hidden stack" aria-live="polite">
+    <div class="card top-lens" id="topCard"></div>
+    <div class="card">
+      <h2>Your team's lens profile</h2>
+      <p class="hint">How many of your team decisions came from each lens.</p>
+      <div class="bars" id="bars"></div>
+    </div>
+    <div class="card">
+      <h2>Your decisions</h2>
+      <div id="log"></div>
+    </div>
+    <div class="card">
+      <h2>Talk about it</h2>
+      <ul class="prompts" id="prompts"></ul>
+    </div>
+    <div class="card">
+      <h2>Share your result</h2>
+      <p class="hint">Copy a one-line summary to paste in the chat.</p>
+      <div class="actions">
+        <button class="btn" id="copyBtn">Copy our result</button>
+        <button class="btn ghost" id="retakeBtn">Start over</button>
+        <span class="toast hidden" id="toast">Copied!</span>
+      </div>
+      <p class="foot">There is no best lens. The point is to notice which lenses your team reached for, and which it left out.</p>
+    </div>
+  </section>
+</main>
+<script>
+(function () {
+  "use strict";
+  var LENSES = {
+    R: { name: "Results", sub: "Utilitarianism", q: "What produces the best ratio of happiness to harm?" },
+    D: { name: "Duty", sub: "Kantian ethics", q: "What is the right thing to do, always, regardless of who is involved?" },
+    F: { name: "Fairness", sub: "Rawlsian justice", q: "What would I do if I did not know how this decision would affect me or the people close to me?" },
+    C: { name: "Care", sub: "Ethics of care", q: "What preserves relationships and protects others from harm?" },
+    V: { name: "Character", sub: "Virtue ethics", q: "What would a virtuous person do?" }
+  };
+  var KEYS = ["R", "D", "F", "C", "V"];
+
+  var DILEMMAS = [
+    { title: "The AI that can do the job",
+      scen: "A software vendor shows leadership an AI tool that could handle the work of your 12-person customer support team at one third of the cost. The company had a good year. Leadership wants a rollout plan in 30 days. The team knows nothing yet.",
+      ask: "As HR leader, what do you recommend?",
+      a: {
+        R: "Back the plan that protects the most jobs and customers over the next few years, even though some roles will go.",
+        D: "Tell the team now, before anything is decided. People have a right to know about something that affects their livelihood.",
+        F: "Set terms you would accept if you were the person whose job is replaced: long notice, paid retraining, and the same rules for everyone.",
+        C: "Start with the people. Meet each person one on one, begin with those who will struggle most, and help them plan what comes next.",
+        V: "Do what an honest, courageous HR leader would do: tell leadership the timeline must be humane, and do not call job cuts \u201coptimization.\u201d" } },
+    { title: "A CEO under suspicion",
+      scen: "A board member tells you in confidence that the CEO is in a relationship with a consultant who may be passing sensitive information to a foreign government. There is no proof. The CEO says it is personal. The company is in the middle of a sensitive contract. The board member asks you to keep quiet until they have \u201cconfirmed.\u201d",
+      ask: "What do you do?",
+      a: {
+        R: "Bring in the company's lawyers and security now. The risk to the contract, and to everyone who depends on it, outweighs the CEO's privacy.",
+        D: "Follow the conflict-of-interest policy: a possible conflict is reported through the proper channel, whoever it involves, the CEO included.",
+        F: "Use the same investigation process you would use for any employee, and make sure it is one you would accept if you were the CEO accused or the employee who raised it.",
+        C: "Talk privately with the CEO and with the board member. Both are people with a lot to lose, and a rumor can wreck a career and a family.",
+        V: "Be courageous and prudent. Do not look away because the person is the boss, and do not spread a rumor. Get the facts and take them to the right people." } },
+    { title: "The screening tool",
+      scen: "Your AI resume screener has cut time-to-hire in half. An analyst finds it rejects candidates with employment gaps at twice the usual rate, and those candidates are mostly women returning from caregiving. The hiring manager says the tool finds the best people and that fixing it will delay 40 open roles.",
+      ask: "What do you do?",
+      a: {
+        R: "Weigh the total benefits and harms: faster hiring for many against unfair rejections for some. Keep the tool only if the numbers clearly favor it.",
+        D: "Pause the tool. Screening people out for caregiving gaps is wrong, however much time it saves.",
+        F: "Change the process so you would trust it if you were an applicant with a gap on your resume: a person reviews every rejection of that kind.",
+        C: "Reach out to the rejected candidates and give them a second look, and talk with the hiring managers about who is being left out.",
+        V: "Ask what you would be proud to put your name on. Fix it first, even if it is slower, and explain why to the hiring manager." } },
+    { title: "Confidential data in a chatbot",
+      scen: "One of your best performers pasted a client's confidential data into a public AI chatbot to finish a report faster. She has just returned from family leave. You are the only one who has noticed.",
+      ask: "What do you do?",
+      a: {
+        R: "Assess how likely and how serious the exposure is, and let the size of the possible harm decide how far to escalate.",
+        D: "Report it, as the policy and the law require, and treat her like any other employee who broke the rule.",
+        F: "Choose a response you could defend to her and to the client: report the breach, and keep the consequence proportionate.",
+        C: "Talk with her first. She may be overwhelmed after leave, and what she needs is support and training, not punishment.",
+        V: "Be firm and kind: report it, coach her, and own your part if the rules about AI were never made clear." } },
+    { title: "The viral post",
+      scen: "An employee's post about a political event goes viral. It was on her personal account, outside work hours. Customers are angry, and two large clients threaten to leave. Her manager wants her gone by Friday.",
+      ask: "What do you recommend?",
+      a: {
+        R: "Weigh the consequences of each choice for the company, the jobs that depend on those clients, and for her.",
+        D: "Apply the social media policy exactly as written, the same as you would for anyone, whatever the opinion.",
+        F: "Choose a rule you could accept whichever side you were on: the employee, the offended customer, or a coworker who disagrees with her.",
+        C: "Talk with her first, and with the coworkers who feel hurt. Look for a way to repair the damage without ending a career.",
+        V: "Ask what a professional with integrity and courage would do: do not bow to pressure, and do not ignore real harm." } },
+    { title: "Predicting who will quit",
+      scen: "A vendor offers an AI tool that reads email and chat patterns to flag employees likely to resign. Your CEO says it would help you keep talent. Employees have not been told it exists.",
+      ask: "What do you recommend?",
+      a: {
+        R: "Pilot it only if keeping talent clearly outweighs the harm of people feeling watched, and measure both.",
+        D: "Do not use it secretly. People are not data to be mined, and they have a right to know how they are being watched.",
+        F: "Adopt it only on terms you would accept as an employee being analyzed: full disclosure, limits on use, and the same rules for executives.",
+        C: "Skip the tool and talk to people. Ask them what would make them stay, and fix the problems you hear about.",
+        V: "Ask what kind of workplace you want to be known for. Choose the option that builds trust, even if it costs some retention." } }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { i: 0, picks: [], unity: [], order: [] };
+  var UNITY = ["Everyone agreed", "Most of us agreed", "We were split"];
+
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function show(id) { ["welcome", "quiz", "results"].forEach(function (s) { $(s).classList.toggle("hidden", s !== id); }); window.scrollTo(0, 0); }
+
+  function start() {
+    state.i = 0; state.picks = []; state.unity = [];
+    state.order = DILEMMAS.map(function () { return shuffle(KEYS); });
+    show("quiz"); render();
+  }
+
+  function render() {
+    var d = DILEMMAS[state.i], n = DILEMMAS.length;
+    $("pLabel").textContent = "Dilemma " + (state.i + 1) + " of " + n;
+    $("pPct").textContent = Math.round(state.i / n * 100) + "%";
+    $("pFill").style.width = Math.round(state.i / n * 100) + "%";
+    $("dtitle").textContent = d.title; $("scen").textContent = d.scen; $("ask").textContent = d.ask;
+    var box = $("opts"); box.innerHTML = "";
+    state.order[state.i].forEach(function (k, idx) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.setAttribute("data-k", k);
+      var num = document.createElement("span"); num.className = "num"; num.textContent = String.fromCharCode(65 + idx);
+      var tx = document.createElement("span"); tx.textContent = d.a[k];
+      b.appendChild(num); b.appendChild(tx);
+      if (state.picks[state.i] === k) b.classList.add("sel");
+      b.addEventListener("click", function () { state.picks[state.i] = k; render(); });
+      box.appendChild(b);
+    });
+    var seg = $("seg"); seg.innerHTML = "";
+    UNITY.forEach(function (u, ui) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = u;
+      if (state.unity[state.i] === ui) b.classList.add("sel");
+      b.addEventListener("click", function () { state.unity[state.i] = ui; render(); });
+      seg.appendChild(b);
+    });
+    var ready = state.picks[state.i] != null && state.unity[state.i] != null;
+    $("nextBtn").disabled = !ready;
+    $("nextBtn").textContent = state.i === n - 1 ? "See results" : "Next";
+    $("backBtn").disabled = state.i === 0;
+    $("finishBtn").classList.toggle("hidden", state.i < 3 || state.i === n - 1 || !ready);
+  }
+
+  function counts() {
+    var c = { R: 0, D: 0, F: 0, C: 0, V: 0 };
+    state.picks.forEach(function (k) { if (k) c[k]++; });
+    return c;
+  }
+  function done() { return state.picks.filter(function (k) { return k; }).length; }
+
+  function results() {
+    var c = counts(), total = done();
+    var max = Math.max.apply(null, KEYS.map(function (k) { return c[k]; }));
+    var tops = KEYS.filter(function (k) { return c[k] === max; });
+    var zero = KEYS.filter(function (k) { return c[k] === 0; });
+    var top = $("topCard");
+    var title = tops.length === 1 ? LENSES[tops[0]].name : tops.map(function (k) { return LENSES[k].name; }).join(" + ");
+    top.innerHTML = "<p class='kicker'>Your team leaned on</p><p class='lens-name'></p><p></p>";
+    top.querySelector(".lens-name").textContent = title;
+    top.lastChild.textContent = tops.length === 1
+      ? "Your team chose this lens in " + max + " of " + total + " dilemmas. " + LENSES[tops[0]].q
+      : "Your team split its choices between these lenses, " + max + " each out of " + total + " dilemmas.";
+    var bars = $("bars"); bars.innerHTML = "";
+    KEYS.forEach(function (k) {
+      var row = document.createElement("div"); row.className = "barrow";
+      var bt = document.createElement("div"); bt.className = "bt"; bt.innerHTML = "<span></span><small></small>";
+      bt.children[0].textContent = LENSES[k].name; bt.children[1].textContent = LENSES[k].sub;
+      var tr = document.createElement("div"); tr.className = "bartrack";
+      var f = document.createElement("div"); f.className = "barfill" + (c[k] === max && max > 0 ? " top" : "");
+      tr.appendChild(f);
+      var v = document.createElement("div"); v.className = "bv"; v.textContent = c[k];
+      row.appendChild(bt); row.appendChild(tr); row.appendChild(v); bars.appendChild(row);
+      setTimeout(function () { f.style.width = (total ? c[k] / total * 100 : 0) + "%"; }, 30);
+    });
+    var log = $("log"); log.innerHTML = "";
+    state.picks.forEach(function (k, i) {
+      if (!k) return;
+      var r = document.createElement("div"); r.className = "rowline";
+      var l = document.createElement("span"); l.textContent = DILEMMAS[i].title + ": " + LENSES[k].name;
+      var t = document.createElement("span"); t.className = "tag " + (state.unity[i] === 0 ? "u" : state.unity[i] === 2 ? "s" : ""); t.textContent = UNITY[state.unity[i]];
+      r.appendChild(l); r.appendChild(t); log.appendChild(r);
+    });
+    var pr = $("prompts"); pr.innerHTML = "";
+    var items = [];
+    var splitIdx = []; state.unity.forEach(function (u, i) { if (u === 2 && state.picks[i]) splitIdx.push(i); });
+    if (splitIdx.length) items.push("Where was your team split? Take \u201c" + DILEMMAS[splitIdx[0]].title + "\u201d: what did the lens that lost see that the winning lens missed?");
+    else items.push("Your team rarely split. When you agreed, did anyone feel they were giving something up? What did they give up?");
+    if (zero.length) items.push("Your team never chose " + (function (n) { return n.length > 1 ? n.slice(0, -1).join(", ") + " or " + n[n.length - 1] : n[0]; })(zero.map(function (k) { return LENSES[k].name; })) + ". What would that lens have asked about the dilemma you found hardest?");
+    items.push("Compare this with your solo survey. Did you decide as a team the way you decide alone?");
+    items.push("Which of today's decisions would you most want to revisit with a fifth, sixth or seventh person in the room?");
+    items.forEach(function (t) { var li = document.createElement("li"); li.textContent = t; pr.appendChild(li); });
+    show("results");
+  }
+
+  function summary() {
+    var c = counts(), total = done();
+    return "Our team's lens profile (" + total + " dilemmas): " + KEYS.map(function (k) { return LENSES[k].name + " " + c[k]; }).join(", ") + ".";
+  }
+
+  $("startBtn").addEventListener("click", start);
+  $("backBtn").addEventListener("click", function () { if (state.i > 0) { state.i--; render(); } });
+  $("nextBtn").addEventListener("click", function () { if (state.i < DILEMMAS.length - 1) { state.i++; render(); } else results(); });
+  $("finishBtn").addEventListener("click", results);
+  $("retakeBtn").addEventListener("click", function () { show("welcome"); });
+  $("copyBtn").addEventListener("click", function () {
+    var t = summary(), done_ = function () { $("toast").classList.remove("hidden"); setTimeout(function () { $("toast").classList.add("hidden"); }, 1800); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done_, function () { window.prompt("Copy:", t); });
+    else window.prompt("Copy:", t);
+  });
+})();
+</script>
+</body>
+</html>
